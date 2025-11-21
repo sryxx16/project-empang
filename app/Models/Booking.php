@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model
 {
     use HasFactory;
+
+    // Izinkan semua kolom diisi secara massal
+    protected $guarded = [];
 }

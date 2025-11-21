@@ -1,23 +1,36 @@
 import React, { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
 
-// TERIMA PROPS 'landingData' DARI CONTROLLER/ROUTE
 export default function Welcome({ auth, landingData }) {
+    // State Form Guest (Tanpa customer_phone)
     const { data, setData, post, processing, reset } = useForm({
         date: "",
         session: "pagi",
         customer_name: auth.user ? auth.user.name : "",
-        customer_phone: "",
     });
 
     const [successMsg, setSuccessMsg] = useState(null);
 
+    // Fungsi Submit ke Backend
     const handleSubmit = (e) => {
         e.preventDefault();
-        setSuccessMsg(
-            `Halo ${data.customer_name}, pendaftaran berhasil! (Simulasi)`
-        );
-        setTimeout(() => setSuccessMsg(null), 5000);
+
+        post("/booking", {
+            onSuccess: (page) => {
+                // Ambil pesan sukses dari Controller (Flash Message)
+                const msg =
+                    page.props.flash?.success ||
+                    `Halo ${data.customer_name}, pendaftaran berhasil!`;
+                setSuccessMsg(msg);
+                reset(); // Bersihkan form
+
+                // Hilangkan pesan setelah 10 detik
+                setTimeout(() => setSuccessMsg(null), 10000);
+            },
+            onError: (errors) => {
+                console.log("Gagal daftar:", errors);
+            },
+        });
     };
 
     const scrollToSection = (id) => {
@@ -36,7 +49,7 @@ export default function Welcome({ auth, landingData }) {
                         <div className="flex justify-between items-center h-16">
                             <div className="flex items-center">
                                 <span className="text-2xl font-bold text-blue-600">
-                                    🎣 CombroFishing
+                                    🎣 EmpangMantap
                                 </span>
                             </div>
                             <div className="hidden md:flex space-x-8">
@@ -89,19 +102,17 @@ export default function Welcome({ auth, landingData }) {
                             className="w-full h-full object-cover"
                         />
                     </div>
-
                     <div className="relative max-w-7xl mx-auto px-4 text-center text-white">
                         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
                             Rasakan Sensasi Strike <br />{" "}
                             <span className="text-blue-400">
-                                Di CombroFishing
+                                Di Empang Terbaik
                             </span>
                         </h1>
                         <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-300">
                             Air jernih, ikan melimpah, dan fasilitas lengkap.
                         </p>
 
-                        {/* DATA DINAMIS JAM & HARGA */}
                         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
                             <div className="bg-white/10 backdrop-blur border border-white/20 p-6 rounded-xl">
                                 <div className="text-blue-300 font-bold uppercase text-sm">
@@ -109,8 +120,7 @@ export default function Welcome({ auth, landingData }) {
                                 </div>
                                 <div className="text-2xl font-bold">
                                     {landingData.jam_buka}
-                                </div>{" "}
-                                {/* <--- DI SINI */}
+                                </div>
                             </div>
                             <div className="bg-white/10 backdrop-blur border border-white/20 p-6 rounded-xl">
                                 <div className="text-green-300 font-bold uppercase text-sm">
@@ -122,8 +132,7 @@ export default function Welcome({ auth, landingData }) {
                                         landingData.harga_tiket
                                     ).toLocaleString("id-ID")}{" "}
                                     / Lapak
-                                </div>{" "}
-                                {/* <--- DI SINI */}
+                                </div>
                             </div>
                         </div>
 
@@ -138,7 +147,7 @@ export default function Welcome({ auth, landingData }) {
                     </div>
                 </section>
 
-                {/* DATA DINAMIS TENTANG KAMI */}
+                {/* TENTANG KAMI */}
                 <section id="about" className="py-16 bg-white">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -153,7 +162,6 @@ export default function Welcome({ auth, landingData }) {
                                 <h2 className="text-3xl font-bold text-gray-900 mb-4">
                                     Tentang Pemancingan Kami
                                 </h2>
-                                {/* Tampilkan deskripsi dari database */}
                                 <p className="text-lg text-gray-600 mb-6 whitespace-pre-line">
                                     {landingData.about_us}
                                 </p>
@@ -173,7 +181,7 @@ export default function Welcome({ auth, landingData }) {
                     </div>
                 </section>
 
-                {/* DATA DINAMIS GALERI */}
+                {/* GALERI */}
                 <section id="gallery" className="py-16 bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4 text-center mb-12">
                         <h2 className="text-3xl font-bold text-gray-900">
@@ -184,7 +192,6 @@ export default function Welcome({ auth, landingData }) {
                         </p>
                     </div>
                     <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {/* Kalau Galeri Kosong, Tampilkan Placeholder */}
                         {landingData.galleries.length === 0
                             ? [1, 2, 3, 4].map((item) => (
                                   <div
@@ -202,14 +209,13 @@ export default function Welcome({ auth, landingData }) {
                                       </div>
                                   </div>
                               ))
-                            : // Kalau Ada Data, Tampilkan Foto Asli
-                              landingData.galleries.map((item) => (
+                            : landingData.galleries.map((item) => (
                                   <div
                                       key={item.id}
                                       className="relative group overflow-hidden rounded-xl shadow-lg h-64"
                                   >
                                       <img
-                                          src={`/storage/${item.image}`} // Pastikan folder storage sudah di-link
+                                          src={`/storage/${item.image}`}
                                           alt="Galeri"
                                           className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
                                       />
@@ -225,7 +231,7 @@ export default function Welcome({ auth, landingData }) {
                     </div>
                 </section>
 
-                {/* FORM BOOKING (TETAP SAMA) */}
+                {/* FORM BOOKING (VERSI SIMPLE: NAMA SAJA) */}
                 <section id="booking" className="py-20 bg-white">
                     <div className="max-w-4xl mx-auto px-4">
                         <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-xl p-8">
@@ -234,17 +240,64 @@ export default function Welcome({ auth, landingData }) {
                                     Formulir Pendaftaran
                                 </h2>
                                 <p className="text-gray-500">
-                                    Silakan isi data diri Anda di bawah ini.
+                                    Silakan isi data diri Anda untuk mendapatkan
+                                    nomor undian.
                                 </p>
                             </div>
 
                             {successMsg && (
-                                <div className="mb-6 bg-green-100 text-green-700 px-4 py-3 rounded">
+                                <div className="mb-6 bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded font-bold text-center">
                                     {successMsg}
                                 </div>
                             )}
 
                             <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Pilihan Tanggal */}
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                                            Pilih Tanggal
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full border-gray-300 rounded-lg p-3"
+                                            value={data.date}
+                                            onChange={(e) =>
+                                                setData("date", e.target.value)
+                                            }
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Pilihan Sesi */}
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                                            Pilih Sesi
+                                        </label>
+                                        <select
+                                            className="w-full border-gray-300 rounded-lg p-3"
+                                            value={data.session}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "session",
+                                                    e.target.value
+                                                )
+                                            }
+                                        >
+                                            <option value="pagi">
+                                                Pagi (08.00 - 12.00)
+                                            </option>
+                                            <option value="siang">
+                                                Siang (13.00 - 17.00)
+                                            </option>
+                                            <option value="malam">
+                                                Malam (19.00 - 23.00)
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Input Nama (Hanya Ini Saja) */}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">
                                         Nama Lengkap
@@ -259,33 +312,19 @@ export default function Welcome({ auth, landingData }) {
                                                 e.target.value
                                             )
                                         }
-                                        placeholder="Nama Anda"
+                                        placeholder="Masukkan Nama Peserta"
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                                        Nomor WhatsApp
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full border-gray-300 rounded-lg p-3"
-                                        value={data.customer_phone}
-                                        onChange={(e) =>
-                                            setData(
-                                                "customer_phone",
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="0812..."
-                                        required
-                                    />
-                                </div>
+
                                 <button
                                     type="submit"
-                                    className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700"
+                                    disabled={processing}
+                                    className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg"
                                 >
-                                    DAFTAR SEKARANG
+                                    {processing
+                                        ? "SEDANG MENDAFTAR..."
+                                        : "DAFTAR SEKARANG"}
                                 </button>
                             </form>
                         </div>

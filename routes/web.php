@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ReportController;
 use App\Models\Setting;
 use App\Models\Gallery;
 use Illuminate\Foundation\Application;
@@ -35,6 +36,7 @@ Route::get('/', function () {
         ]
     ]);
 });
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
 // --- DASHBOARD USER (PEMANCING) ---
 Route::get('/dashboard', function () {
@@ -62,6 +64,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::post('/pos', [PosController::class, 'store'])->name('admin.pos.store');
 
     // 4. Laporan Harian & Kocokan (Nanti kita buat Controllernya)
+    Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
+    Route::post('/reports/{id}/update', [ReportController::class, 'updateLapak'])->name('admin.reports.update');
     // Route::get('/daily-report', [AdminController::class, 'dailyReport'])->name('admin.daily');
 });
 
